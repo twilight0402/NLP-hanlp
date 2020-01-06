@@ -155,8 +155,42 @@ for emit in acdTrie.parseText("ushers"):
 ```
 
 # Hanlp的词典分词实现
+![](https://picgogogo.oss-cn-hangzhou.aliyuncs.com/img/20200106115726.png)
 
+## DoubleArrayTrieSegment 双数组字典树
+```python
+HanLP.Config.ShowTermNature = True
+segment = DoubleArrayTrieSegment()
+print(segment.seg("江西鄱阳湖干枯，中国最大的淡水湖变成大草原"))
 
+## 传入自己的词典
+dict1 = HANLP_DATA_PATH +  "/dictionary/CoreNatureDictionary.mini.txt"
+dict2 = HANLP_DATA_PATH + "/DICTIONARY/CUSTOM/上海地名.txt ns"
+
+segment = DoubleArrayTrieSegment([dict1, dict2])
+print(segment.seg("上海市虹口区大连西路550号SISU"))
+
+###  enablePartOfSpeechTagging()数字合并和词性标注功能合并，只有打开这个才能看到正确的词性
+segment.enablePartOfSpeechTagging(True)    # 激活数字和英文识别
+HanLP.Config.ShowTermNature = False
+print(segment.seg("上海市虹口区大连西路550号SISU"))
+
+## 遍历分词结果
+segment.enablePartOfSpeechTagging(True)
+HanLP.Config.ShowTermNature = True
+for term in segment.seg("上海市虹口区大连西路550号SISU") :
+    print("%s %s" % (term.word, term.nature))
+```
+## AhoCorasickDoubleArrayTrieSegment 双数组AC自动机
+如果用户的词语都很长，使用AC自动机会更快
+```python
+segment = JClass('com.hankcs.hanlp.seg.Other.AhoCorasickDoubleArrayTrieSegment')
+segment = segment()
+segment.enablePartOfSpeechTagging(True)
+
+for item in segment.seg("江西鄱阳湖干枯，中国最大的淡水湖变成大草原"):
+    print(item.word, item.nature)
+```
 # 2.9 准确度评测
 ## 1.混淆矩阵
 P(Positive), N(negative)
