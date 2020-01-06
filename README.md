@@ -1,1 +1,1 @@
-# NLP-hanlp
+- [第二章-词典分词](https://github.com/twilight0402/NLP-hanlp/blob/master/ch02/README.md)
