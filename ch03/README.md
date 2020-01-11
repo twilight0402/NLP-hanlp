@@ -169,6 +169,96 @@ def  load_bigram(model):
 
 ## 3.4.4 词图上的维特比算法
 一种动态规划算法，可以算出在有向图无环图中的最小路径
+维特比算法的实现：
+```python
+def generate_wordnet(sent, trie):
+    """
+    生成词网
+    :param sent: 句子
+    :param trie: 词典（unigram）
+    :return: 词网
+    """
+    searcher = trie.getSearcher(JString(sent), 0)
+    wordnet = WordNet(sent)
+    while searcher.next():
+        wordnet.add(searcher.begin + 1,
+                    Vertex(sent[searcher.begin:searcher.begin + searcher.length], searcher.value, searcher.index))
+    # 原子分词，保证图连通
+    vertexes = wordnet.getVertexes()
+    i = 0
+    while i < len(vertexes):
+        if len(vertexes[i]) == 0:  # 空白行
+            j = i + 1
+            for j in range(i + 1, len(vertexes) - 1):  # 寻找第一个非空行 j
+                if len(vertexes[j]):
+                    break
+            wordnet.add(i, Vertex.newPunctuationInstance(sent[i - 1: j - 1]))  # 填充[i, j)之间的空白行
+            i = j
+        else:
+            i += len(vertexes[i][-1].realWord)
 
-## 与用户词典的集成
+    return wordnet
+
+
+def viterbi(wordnet):
+    nodes = wordnet.getVertexes()
+    # 前向遍历
+    for i in range(0, len(nodes) - 1):
+        for node in nodes[i]:
+            for to in nodes[i + len(node.realWord)]:
+                to.updateFrom(node)  # 根据距离公式计算节点距离，并维护最短路径上的前驱指针from
+    # 后向回溯
+    path = []  # 最短路径
+    f = nodes[len(nodes) - 1].getFirst()  # 从终点回溯
+    while f:
+        path.insert(0, f)
+        f = f.getFrom()  # 按前驱指针from回溯
+    return [v.realWord for v in path]
+```
+
+完整代码:
+```python
+def train_bigram(corpus_path, model_path):
+    sents = CorpusLoader.convert2SentenceList(corpus_path)
+    for sent in sents:
+        for word in sent:
+            word.setLabel("n")
+    
+    maker = NatureDictionaryMaker()
+    maker.compute(sents)
+    # 大坑，只能保存在已有的目录下
+    maker.saveTxtTo(model_path)
+    
+def load_bigram(model_path, verbose=True， ret_viterbi=True):
+    HanLP.Config.CoreDictionaryPath = model_path + ".txt"  # unigram
+    HanLP.Config.BiGramDictionaryPath = model_path + ".ngram.txt"  # bigram
+
+    if verbose:
+        print("商品：", CoreDictionary.getTermFrequency("商品"))
+        print("商品和", CoreBiGramTableDictionary.getBiFrequency("商品", "和"))
+        sent = '商品和服务'
+        wordnet = generate_wordnet(sent, CoreDictionary.trie)
+        print("词网：\n", wordnet)
+        print("维特比路径：\n", viterbi(wordnet))
+        
+    return ViterbiSegment().enableAllNamedEntityRecognize(False).enableCustomDictionary(
+        False) if ret_viterbi else DijkstraSegment().enableAllNamedEntityRecognize(False).enableCustomDictionary(False)
+    
+train_bigram(corpus_path, model_path)
+load_bigram(model_path)
+```
+
+实际上，调用已经写好的维特比类很简单：
+```python
+vite = ViterbiSegment()
+vite.seg("商品和服务")
+
+for item in list:
+    print(item)
+```
+```python
+商品
+和
+服务
+```
 
