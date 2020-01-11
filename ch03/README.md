@@ -262,3 +262,25 @@ for item in list:
 服务
 ```
 
+## 与用户词典的集成
+用户可以自定义词典
+- 低优先级下，首先不考虑用户词典
+- 高优先级下，优先考虑用户词典
+
+```python
+ViterbiSegment = SafeJClass('com.hankcs.hanlp.seg.Viterbi.ViterbiSegment')
+
+segment = ViterbiSegment()
+sentence = "社会摇摆简称社会摇"
+
+segment.enableCustomDictionary(False)
+print("不挂载词典：", segment.seg(sentence))
+
+CustomDictionary.insert("社会摇", "nz 100")
+segment.enableCustomDictionary(True)
+
+print("低优先级词典：", segment.seg(sentence))
+
+segment.enableCustomDictionaryForcing(True)
+print("高优先级词典：", segment.seg(sentence))
+```
