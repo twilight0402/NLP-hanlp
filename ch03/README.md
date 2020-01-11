@@ -262,7 +262,7 @@ for item in list:
 服务
 ```
 
-## 与用户词典的集成
+## 3.4.5 与用户词典的集成
 用户可以自定义词典
 - 低优先级下，首先不考虑用户词典
 - 高优先级下，优先考虑用户词典
@@ -283,4 +283,23 @@ print("低优先级词典：", segment.seg(sentence))
 
 segment.enableCustomDictionaryForcing(True)
 print("高优先级词典：", segment.seg(sentence))
+```
+
+# 3.5 评测
+
+```python
+sighan05='E:/Workspaces/Python/Envs/NLP/Lib/site-packages/pyhanlp/static/data/test/icwb2-data'
+msr_dict = os.path.join(sighan05, 'gold', 'msr_training_words.utf8')
+msr_train = os.path.join(sighan05, 'training', 'msr_training.utf8')
+msr_model = os.path.join(test_data_path(), 'msr_cws')
+msr_test = os.path.join(sighan05, 'testing', 'msr_test.utf8')
+msr_output = os.path.join(sighan05, 'testing', 'msr_bigram_output.txt')
+msr_gold = os.path.join(sighan05, 'gold', 'msr_test_gold.utf8')
+
+
+train_bigram(msr_train, msr_model)  # 训练
+segment = load_bigram(msr_model, verbose=False)  # 加载
+
+result = CWSEvaluator.evaluate(segment, msr_test, msr_output, msr_gold, msr_dict)  # 预测打分
+print(result)
 ```
