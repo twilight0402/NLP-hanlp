@@ -1,3 +1,4 @@
 - [第二章-词典分词](ch02/README.md)
 - [第三章-二元语法与中文分词](ch03/README.md)
+- [第四章-隐马尔科夫模型与序列标注](ch04/README.md)
 - [其他](other/other.md)
